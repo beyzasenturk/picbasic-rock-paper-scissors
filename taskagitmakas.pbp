@@ -1,0 +1,110 @@
+include "lcd_tanimlamalari.pbp" 
+
+DEFINE HSER_RCSTA 90h
+define HSER_TXSTA 24h
+DEFINE HSER_BAUD 9600
+DEFINE HSER_CLROERR 1 
+
+o1 var byte
+o2 var byte
+
+lcdout $fe, $40,0,27,4,10,17,0,0  'makas
+lcdout $fe,$48,0,4,14,31,0,0,0    'tas 
+lcdout $fe,$50,2,7,14,28,8,0,0     'kagit
+lcdout $fe,1
+trisb=0
+symbol ses = PortB.0
+
+label: 
+hserout["Tas=t, kagit=k, makas=m",13,10] 
+hserout["1.Oyuncu degerini girsin: ",13,10] 
+hserin 5000,devam,[o1] 
+if o1 != "t" then 
+   if o1 != "k" then 
+      if o1 != "m" then 
+         hserout["duzgun deger gir" ,13,10]
+         sound ses, [60,10] 
+         goto label 
+      endif
+   endif
+endif
+hserout["birinci oyuncu girdi ikinci oyuncu bekleniyor",13,10]
+oyuncu2:
+hserout["2.oyuncu deger girsin: ",13,10] 
+hserin 5000, devam2, [o2]
+if o2 != "t" then 
+   if o2 != "k" then 
+      if o2 != "m" then 
+         hserout["duzgun deger gir" ,13,10] 
+         goto oyuncu2
+      endif
+   endif
+endif
+
+if o1="m" and o2="m" then
+lcdout $fe,1
+lcdout 0," ",0, " bir sey yapamaz" 
+lcdout $fe,$c0, "berabere kaldi" 
+endif
+
+if o1="m" and o2="t" then 
+lcdout $fe,1
+lcdout 1," ",0, " kirar"
+lcdout $fe,$c0, "ikinci oyuncu kazandi" 
+endif
+
+if o1="m" and o2="k" then 
+lcdout $fe,1
+lcdout 0," ",2, " keser"
+lcdout $fe,$c0, "birinci oyuncu kazandi" 
+endif
+
+if o1="k" and o2="k" then 
+lcdout $fe,1
+lcdout 2," ",2, " bir sey yapamaz"
+lcdout $fe,$c0, "birinci oyuncu kazandi" 
+endif
+
+if o1="k" and o2="t" then 
+lcdout $fe,1
+lcdout 2," ",1, " kaplar"
+lcdout $fe,$c0, "birinci oyuncu kazandi" 
+endif
+
+if o1="k" and o2="m" then 
+lcdout $fe,1
+lcdout 0," ",2, " keser"
+lcdout $fe,$c0, "ikinci oyuncu kazandi" 
+endif
+
+if o1="t" and o2="t" then 
+lcdout $fe,1
+lcdout 1," ",1, " bir sey yapamaz"
+lcdout $fe,$c0, "berabere kaldi" 
+endif
+
+if o1="t" and o2="k" then 
+lcdout $fe,1
+lcdout 2," ",1, " kaplar"
+lcdout $fe,$c0, "birinci oyuncu kazandi" 
+endif
+
+
+if o1="t" and o2="m" then 
+lcdout $fe,1
+lcdout 1, " ", 0, " kirar" 
+lcdout $fe, $c0, "birinci oyuncu kazandi"
+endif
+
+goto label 
+
+devam: 
+hserout["Duzgun deger gir",13,10] 
+goto label 
+
+devam2: 
+hserout["Duzgun deger gir",13,10] 
+goto oyuncu2
+
+
+
